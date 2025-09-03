@@ -1,4 +1,3 @@
-
 <project name="apic-cicd" default="ci" basedir=".">
   <!-- ================== PROPERTIES ================== -->
   <property name="API_NAME" value="loan-api"/>
@@ -41,45 +40,36 @@
     </exec>
     <echo message="API exists? ${api.exists}"/>
   </target>
-    <!-- ================== BACKUP ================== -->
-  <target name="backup">
-    <echo message="📦 Backing up API &amp; Product YAMLs with timestamp..."/>
+   <!-- Git commit and push backup -->
+<exec executable="git" dir="." failonerror="true">
+  <arg value="config"/>
+  <arg value="user.name"/>
+  <arg value="Jenkins CI"/>
+</exec>
 
-    <tstamp>
-      <format property="backup.timestamp" pattern="yyyyMMdd_HHmmss"/>
-    </tstamp>
+<exec executable="git" dir="." failonerror="true">
+  <arg value="config"/>
+  <arg value="user.email"/>
+  <arg value="jenkins@yourcompany.com"/>
+</exec>
 
-    <!-- Backup API -->
-    <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
-          tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
-          overwrite="false"/>
+<exec executable="git" dir="." failonerror="true">
+  <arg value="add"/>
+  <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+  <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+</exec>
 
-    <!-- Backup Product -->
-    <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
-          tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
-          overwrite="false"/>
+<exec executable="git" dir="." failonerror="true">
+  <arg value="commit"/>
+  <arg value="-m"/>
+  <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+</exec>
 
-    <echo message="✅ Backup created: ${backup.timestamp}"/>
-
-    <!-- Git commit and push backup -->
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="add"/>
-      <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-      <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-    </exec>
-
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="commit"/>
-      <arg value="-m"/>
-      <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
-    </exec>
-
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="push"/>
-      <arg value="origin"/>
-      <arg value="main"/>
-    </exec>
-  </target>
+<exec executable="git" dir="." failonerror="true">
+  <arg value="push"/>
+  <arg value="origin"/>
+  <arg value="main"/>
+</exec>
   <!-- ================== PROCESS API ================== -->
   <target name="api-process" depends="api-check">
     <condition property="api.exists.true">
