@@ -40,21 +40,44 @@
     </exec>
     <echo message="API exists? ${api.exists}"/>
   </target>
-  <!-- ================== BACKUP ================== -->
+    <!-- ================== BACKUP ================== -->
   <target name="backup">
-    <echo message=":package: Backing up API &amp; Product YAMLs with timestamp..."/>
+    <echo message="📦 Backing up API &amp; Product YAMLs with timestamp..."/>
+
     <tstamp>
       <format property="backup.timestamp" pattern="yyyyMMdd_HHmmss"/>
     </tstamp>
+
     <!-- Backup API -->
     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
           tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
           overwrite="false"/>
+
     <!-- Backup Product -->
     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
           tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
           overwrite="false"/>
-    <echo message=":white_check_mark: Backup created: ${backup.timestamp}"/>
+
+    <echo message="✅ Backup created: ${backup.timestamp}"/>
+
+    <!-- Git commit and push backup -->
+    <exec executable="git" dir="." failonerror="true">
+      <arg value="add"/>
+      <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+      <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+    </exec>
+
+    <exec executable="git" dir="." failonerror="true">
+      <arg value="commit"/>
+      <arg value="-m"/>
+      <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+    </exec>
+
+    <exec executable="git" dir="." failonerror="true">
+      <arg value="push"/>
+      <arg value="origin"/>
+      <arg value="main"/>
+    </exec>
   </target>
   <!-- ================== PROCESS API ================== -->
   <target name="api-process" depends="api-check">
