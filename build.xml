@@ -1,13 +1,13 @@
+
 <project name="apic-cicd" default="ci" basedir=".">
   <!-- ================== PROPERTIES ================== -->
   <property name="API_NAME" value="loan-api"/>
   <property name="API_VERSION" value="1.0.0"/>
   <property name="PRODUCT_NAME" value="loan-product"/>
   <property name="CATALOG_NAME" value="prod"/>
-
   <!-- ================== LOGIN ================== -->
   <target name="login">
-    <echo message="🔐 Logging in to API Connect..."/>
+    <echo message=":closed_lock_with_key: Logging in to API Connect..."/>
     <exec executable="apic" failonerror="true">
       <arg value="login"/>
       <arg value="--server"/>
@@ -20,19 +20,17 @@
       <arg value="provider/default-idp-2"/>
     </exec>
   </target>
-
   <!-- ================== VALIDATE API ================== -->
   <target name="validate" depends="login">
-    <echo message="✅ Validating API YAML for ${API_NAME}_${API_VERSION}"/>
+    <echo message=":white_check_mark: Validating API YAML for ${API_NAME}_${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="validate"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
     </exec>
   </target>
-
   <!-- ================== CHECK API ================== -->
   <target name="api-check" depends="validate">
-    <echo message="🔎 Checking if API exists..."/>
+    <echo message=":mag_right: Checking if API exists..."/>
     <exec executable="apic" failonerror="false" outputproperty="api.exists">
       <arg value="draft-apis:get"/>
       <arg value="${API_NAME}:${API_VERSION}"/>
@@ -43,8 +41,7 @@
     </exec>
     <echo message="API exists? ${api.exists}"/>
   </target>
-
-  <!-- ================== BACKUP ================== -->
+    <!-- ================== BACKUP ================== -->
   <target name="backup">
     <echo message="📦 Backing up API &amp; Product YAMLs with timestamp..."/>
 
@@ -64,41 +61,25 @@
 
     <echo message="✅ Backup created: ${backup.timestamp}"/>
 
-    <!-- Ensure we are on main -->
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="checkout"/>
-      <arg value="main"/>
-    </exec>
-
-    <!-- Pull latest before commit -->
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="pull"/>
-      <arg value="origin"/>
-      <arg value="main"/>
-    </exec>
-
-    <!-- Stage backup files -->
+    <!-- Git commit and push backup -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="add"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     </exec>
 
-    <!-- Commit -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="commit"/>
       <arg value="-m"/>
       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
-    <!-- Push -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="push"/>
       <arg value="origin"/>
       <arg value="main"/>
     </exec>
   </target>
-
   <!-- ================== PROCESS API ================== -->
   <target name="api-process" depends="api-check">
     <condition property="api.exists.true">
@@ -110,9 +91,8 @@
     <antcall target="api-update"/>
     <antcall target="api-create"/>
   </target>
-
   <target name="api-create" unless="api.exists.true">
-    <echo message="🆕 Creating new draft API ${API_NAME}:${API_VERSION}"/>
+    <echo message=":new: Creating new draft API ${API_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-apis:create"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
@@ -122,9 +102,8 @@
       <arg value="indusapi-np"/>
     </exec>
   </target>
-
   <target name="api-update" if="api.exists.true">
-    <echo message="♻️ Updating existing draft API ${API_NAME}:${API_VERSION}"/>
+    <echo message=":recycle: Updating existing draft API ${API_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-apis:update"/>
       <arg line="${API_NAME}:${API_VERSION} apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
@@ -134,20 +113,18 @@
       <arg value="indusapi-np"/>
     </exec>
   </target>
-
   <!-- ================== FIX PRODUCT API REFS ================== -->
   <target name="fix-refs" depends="api-process">
-    <echo message="🔧 Fixing API references in product YAML..."/>
+    <echo message=":wrench: Fixing API references in product YAML..."/>
     <exec executable="bash" failonerror="true">
       <arg value="/var/lib/jenkins/scripts/fix-refs.sh"/>
       <arg value="products/${PRODUCT_NAME}"/>
       <arg value="apis"/>
     </exec>
   </target>
-
   <!-- ================== CHECK PRODUCT ================== -->
   <target name="product-check" depends="fix-refs">
-    <echo message="🔎 Checking if Product exists..."/>
+    <echo message=":mag_right: Checking if Product exists..."/>
     <exec executable="apic" failonerror="false" outputproperty="product.exists">
       <arg value="draft-products:get"/>
       <arg value="${PRODUCT_NAME}:${API_VERSION}"/>
@@ -158,7 +135,6 @@
     </exec>
     <echo message="Product exists? ${product.exists}"/>
   </target>
-
   <!-- ================== PROCESS PRODUCT ================== -->
   <target name="product-process" depends="product-check">
     <condition property="product.exists.true">
@@ -170,9 +146,8 @@
     <antcall target="product-update"/>
     <antcall target="product-create"/>
   </target>
-
   <target name="product-create" unless="product.exists.true">
-    <echo message="🆕 Creating new draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
+    <echo message=":new: Creating new draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-products:create"/>
       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
@@ -182,9 +157,8 @@
       <arg value="indusapi-np"/>
     </exec>
   </target>
-
   <target name="product-update" if="product.exists.true">
-    <echo message="♻️ Updating existing draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
+    <echo message=":recycle: Updating existing draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-products:update"/>
       <arg line="${PRODUCT_NAME}:${API_VERSION} products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
@@ -194,10 +168,9 @@
       <arg value="indusapi-np"/>
     </exec>
   </target>
-
   <!-- ================== PUBLISH PRODUCT ================== -->
   <target name="publish" depends="product-process">
-    <echo message="🚀 Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
+    <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
     <exec executable="apic" failonerror="true">
       <arg value="products:publish"/>
       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
@@ -210,12 +183,11 @@
       <arg value="--org"/>
       <arg value="indusapi-np"/>
     </exec>
-    <!-- Run backup only after publish succeeds -->
+    <!-- :small_blue_diamond: Run backup only after publish succeeds -->
     <antcall target="backup"/>
   </target>
-
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
-    <echo message="🎉 CI/CD pipeline completed successfully!"/>
+    <echo message=":tada: CI/CD pipeline completed successfully!"/>
   </target>
 </project>
