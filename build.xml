@@ -194,6 +194,12 @@
     </exec>
   </target>
 
+  <exec executable="git">
+      <arg value="push"/>
+      <arg value="https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+  </exec>
+
+
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="backup">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
