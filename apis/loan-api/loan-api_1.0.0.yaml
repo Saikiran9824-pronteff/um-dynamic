@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: loan-api
   x-ibm-name: loan-api
@@ -13,22 +13,22 @@ x-ibm-configuration:
   testable: true
   assembly:
     execute:
-    - invoke:
-        title: invoke
-        version: 2.0.0
-        verb: keep
-        target-url: $(target-url)
-        follow-redirects: false
-        timeout: 60
-        parameter-control:
-          type: allowlist
-          values: []
-        header-control:
-          type: blocklist
-          values: []
-        inject-proxy-headers: true
-        chunked-uploads: true
-        persistent-connection: true
+      - invoke:
+          title: invoke
+          version: 2.0.0
+          verb: keep
+          target-url: $(target-url)
+          follow-redirects: false
+          timeout: 60
+          parameter-control:
+            type: allowlist
+            values: []
+          header-control:
+            type: blocklist
+            values: []
+          inject-proxy-headers: true
+          chunked-uploads: true
+          persistent-connection: true
   properties:
     target-url:
       value: http://example.com/operation-name
@@ -39,7 +39,7 @@ paths:
   /:
     get:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -47,7 +47,7 @@ paths:
       produces: []
     put:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -55,7 +55,7 @@ paths:
       produces: []
     post:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -63,7 +63,7 @@ paths:
       produces: []
     delete:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -71,7 +71,7 @@ paths:
       produces: []
     head:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -79,7 +79,7 @@ paths:
       produces: []
     patch:
       responses:
-        "200":
+        '200':
           description: success
           schema:
             type: string
@@ -91,6 +91,6 @@ securityDefinitions:
     in: header
     name: X-IBM-Client-Id
 security:
-- clientID: []
+  - clientID: []
 schemes:
-- https
+  - https
