@@ -163,42 +163,48 @@
      </exec>
      <antcall target="backup"/>
    </target>
-   
-   <!-- ================== BACKUP ================== -->
-   <target name="backup">
-     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
-   
-     <property name="api.backup.file" value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-     <property name="product.backup.file" value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-   
-     <mkdir dir="apis/${API_NAME}"/>
-     <mkdir dir="products/${PRODUCT_NAME}"/>
-   
-     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
-     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
-   
-     <exec executable="git" failonerror="true">
-       <arg value="add"/>
-       <arg value="${api.backup.file}"/>
-       <arg value="${product.backup.file}"/>
-     </exec>
-   
-     <exec executable="git" failonerror="true">
-       <arg value="commit"/>
-       <arg value="-m"/>
-       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
-     </exec>
-   
-     <echo message=":arrow_up: Pushing backup to branch main"/>
-     <exec executable="bash" failonerror="true">
-       <arg value="-c"/>
-       <arg value="git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git HEAD:main"/>
-     </exec>
-   
-     <!-- cleanup only temporary timestamped backup copies -->
-     <delete file="${api.backup.file}" quiet="true"/>
-     <delete file="${product.backup.file}" quiet="true"/>
-   </target>
+     <!-- ================== BACKUP ================== -->
+    <target name="backup">
+    <echo message=":floppy_disk: Backing up API and Product definitions..."/>
+
+    <!-- New folder structure -->
+    <property name="api.backup.dir" value="apis/${API_NAME}/api_backup"/>
+    <property name="product.backup.dir" value="products/${PRODUCT_NAME}/product_backup"/>
+
+    <property name="api.backup.file" value="${api.backup.dir}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+    <property name="product.backup.file" value="${product.backup.dir}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+
+    <!-- Ensure folders exist -->
+    <mkdir dir="${api.backup.dir}"/>
+    <mkdir dir="${product.backup.dir}"/>
+
+    <!-- Copy current definitions into backup folders -->
+    <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
+    <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
+
+    <!-- Git add & commit -->
+    <exec executable="git" failonerror="true">
+      <arg value="add"/>
+      <arg value="${api.backup.file}"/>
+      <arg value="${product.backup.file}"/>
+    </exec>
+
+    <exec executable="git" failonerror="true">
+      <arg value="commit"/>
+      <arg value="-m"/>
+      <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+    </exec>
+
+    <echo message=":arrow_up: Pushing backup to branch main"/>
+    <exec executable="bash" failonerror="true">
+      <arg value="-c"/>
+      <arg value="git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git HEAD:main"/>
+    </exec>
+
+    <!-- Keep backups, no delete -->
+    <echo message=":package: Backup files retained under api_backup and product_backup"/>
+  </target>
+
    
    <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
