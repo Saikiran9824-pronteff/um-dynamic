@@ -165,18 +165,37 @@
   </target>
 
     <target name="backup">
+        <echo>:floppy_disk: Backing up API and Product definitions...</echo>
+
+        <!-- Ensure api/product folders exist -->
+        <mkdir dir="apis/${API_NAME}"/>
+        <mkdir dir="products/${PRODUCT_NAME}"/>
+
+        <!-- Copy API file into apis/<api-name>/ -->
+        <copy file="${API_FILE}"
+              tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${DSTAMP}${TSTAMP}.yaml"
+              overwrite="true"/>
+
+        <!-- Copy Product file into products/<product-name>/ -->
+        <copy file="${PRODUCT_FILE}"
+              tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${DSTAMP}${TSTAMP}.yaml"
+              overwrite="true"/>
+
         <!-- Stage changes -->
         <exec executable="git" failonerror="true">
             <arg value="add"/>
-            <arg value="."/>
+            <arg value="apis/${API_NAME}"/>
+            <arg value="products/${PRODUCT_NAME}"/>
         </exec>
 
-        <!-- Commit with message -->
+        <!-- Commit with timestamp -->
         <exec executable="git" failonerror="true">
             <arg value="commit"/>
             <arg value="-m"/>
-            <arg value="Automated backup from Jenkins"/>
+            <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${DSTAMP}${TSTAMP}"/>
         </exec>
+
+        <echo>:arrow_up: Pushing backup to branch main</echo>
 
         <!-- Push using GitHub PAT -->
         <exec executable="git" failonerror="true">
