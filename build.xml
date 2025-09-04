@@ -1,12 +1,10 @@
 <project name="apic-cicd" default="ci" basedir=".">
   <!-- ================== PROPERTIES ================== -->
-  <!-- Default values -->
   <property name="default.API_NAME" value="loan-api"/>
   <property name="default.API_VERSION" value="1.0.0"/>
   <property name="default.PRODUCT_NAME" value="loan-product"/>
   <property name="default.CATALOG_NAME" value="prod"/>
 
-  <!-- Resolve final values (fallback to defaults if empty or unset) -->
   <condition property="API_NAME" value="${default.API_NAME}">
     <or>
       <not><isset property="API_NAME"/></not>
@@ -35,7 +33,6 @@
     </or>
   </condition>
 
-  <!-- generate timestamp -->
   <tstamp>
     <format property="backup.timestamp" pattern="yyyyMMddHHmmss"/>
   </tstamp>
@@ -226,10 +223,17 @@
       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
+    <!-- Detect default branch dynamically -->
+    <exec executable="sh" outputproperty="git.branch">
+      <arg value="-c"/>
+      <arg value="git rev-parse --abbrev-ref origin/HEAD | sed 's|origin/||'"/>
+    </exec>
+
+    <echo message=":arrow_up: Pushing backup to branch ${git.branch}"/>
     <exec executable="git" dir="." failonerror="true">
       <arg value="push"/>
       <arg value="origin"/>
-      <arg value="main"/>
+      <arg value="${git.branch}"/>
     </exec>
   </target>
 
