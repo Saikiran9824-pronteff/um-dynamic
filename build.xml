@@ -223,10 +223,11 @@
       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
-    <!-- Detect default branch dynamically -->
-    <exec executable="sh" outputproperty="git.branch">
-      <arg value="-c"/>
-      <arg value="git rev-parse --abbrev-ref origin/HEAD | sed 's|origin/||'"/>
+    <!-- Detect current branch -->
+    <exec executable="git" outputproperty="git.branch">
+      <arg value="rev-parse"/>
+      <arg value="--abbrev-ref"/>
+      <arg value="HEAD"/>
     </exec>
 
     <echo message=":arrow_up: Pushing backup to branch ${git.branch}"/>
