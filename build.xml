@@ -167,7 +167,7 @@
   <target name="backup">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
-    <!-- New folder structure -->
+    <!-- Backup folder structure -->
     <property name="api.backup.dir" value="apis/${API_NAME}/api_backup"/>
     <property name="product.backup.dir" value="products/${PRODUCT_NAME}/product_backup"/>
 
@@ -182,6 +182,18 @@
     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
 
+    <!-- Git config -->
+    <exec executable="git" failonerror="true">
+      <arg value="config"/>
+      <arg value="user.name"/>
+      <arg value="Jenkins CI"/>
+    </exec>
+    <exec executable="git" failonerror="true">
+      <arg value="config"/>
+      <arg value="user.email"/>
+      <arg value="jenkins@yourcompany.com"/>
+    </exec>
+
     <!-- Git add & commit -->
     <exec executable="git" failonerror="true">
       <arg value="add"/>
@@ -189,7 +201,7 @@
       <arg value="${product.backup.file}"/>
     </exec>
 
-    <exec executable="git" failonerror="true">
+    <exec executable="git" failonerror="false">
       <arg value="commit"/>
       <arg value="-m"/>
       <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
