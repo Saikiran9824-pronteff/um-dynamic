@@ -165,27 +165,19 @@
   </target>
 
     <target name="backup">
-        <echo>:floppy_disk: Backing up API and Product definitions...</echo>
+        <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
-        <!-- Ensure api/product folders exist -->
-        <mkdir dir="apis/${API_NAME}"/>
-        <mkdir dir="products/${PRODUCT_NAME}"/>
+        <!-- Copy API file into correct folder in repo -->
+        <copy file="${API_FILE}" todir="apis/${API_NAME}" overwrite="true"/>
 
-        <!-- Copy API file into apis/<api-name>/ -->
-        <copy file="${API_FILE}"
-              tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${DSTAMP}${TSTAMP}.yaml"
-              overwrite="true"/>
+        <!-- Copy Product file into correct folder in repo -->
+        <copy file="${PRODUCT_FILE}" todir="products/${PRODUCT_NAME}" overwrite="true"/>
 
-        <!-- Copy Product file into products/<product-name>/ -->
-        <copy file="${PRODUCT_FILE}"
-              tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${DSTAMP}${TSTAMP}.yaml"
-              overwrite="true"/>
-
-        <!-- Stage changes -->
+        <!-- Stage new/updated files -->
         <exec executable="git" failonerror="true">
             <arg value="add"/>
-            <arg value="apis/${API_NAME}"/>
-            <arg value="products/${PRODUCT_NAME}"/>
+            <arg value="apis/${API_NAME}/${API_FILE}"/>
+            <arg value="products/${PRODUCT_NAME}/${PRODUCT_FILE}"/>
         </exec>
 
         <!-- Commit with timestamp -->
@@ -195,14 +187,17 @@
             <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${DSTAMP}${TSTAMP}"/>
         </exec>
 
-        <echo>:arrow_up: Pushing backup to branch main</echo>
-
         <!-- Push using GitHub PAT -->
+        <echo message=":arrow_up: Pushing backup to branch main"/>
         <exec executable="git" failonerror="true">
             <arg value="push"/>
             <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
             <arg value="HEAD:main"/>
         </exec>
+
+        <!-- Cleanup copied files from Jenkins workspace so only GitHub keeps backups -->
+        <delete file="apis/${API_NAME}/${API_FILE}" quiet="true"/>
+        <delete file="products/${PRODUCT_NAME}/${PRODUCT_FILE}" quiet="true"/>
     </target>
 
 
