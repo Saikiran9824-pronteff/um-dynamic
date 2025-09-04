@@ -164,31 +164,28 @@
     <antcall target="backup"/>
   </target>
 
-<project name="GitBackup" default="backup" basedir=".">
-
     <target name="backup">
         <!-- Stage changes -->
-        <exec executable="git">
+        <exec executable="git" failonerror="true">
             <arg value="add"/>
             <arg value="."/>
         </exec>
 
         <!-- Commit with message -->
-        <exec executable="git">
+        <exec executable="git" failonerror="true">
             <arg value="commit"/>
             <arg value="-m"/>
             <arg value="Automated backup from Jenkins"/>
         </exec>
 
         <!-- Push using GitHub PAT -->
-        <exec executable="git">
+        <exec executable="git" failonerror="true">
             <arg value="push"/>
-            <arg value="https://${env.GITHUB_TOKEN}@github.com/YourUser/YourRepo.git"/>
+            <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
             <arg value="HEAD:main"/>
         </exec>
     </target>
 
-</project>
 
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
