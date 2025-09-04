@@ -146,24 +146,25 @@
     </exec>
   </target>
 
-   <!-- ================== PUBLISH PRODUCT ================== -->
-   <target name="publish" depends="product-process">
-     <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
-     <exec executable="apic" failonerror="true">
-       <arg value="products:publish"/>
-       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
-       <arg value="--scope"/>
-       <arg value="catalog"/>
-       <arg value="--catalog"/>
-       <arg value="${CATALOG_NAME}"/>
-       <arg value="--server"/>
-       <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
-       <arg value="--org"/>
-       <arg value="indusapi-np"/>
-     </exec>
-     <antcall target="backup"/>
-	 
-   <target name="backup">
+<!-- ================== PUBLISH PRODUCT ================== -->
+<target name="publish" depends="product-process">
+    <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
+    <exec executable="apic" failonerror="true">
+        <arg value="products:publish"/>
+        <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
+        <arg value="--scope"/>
+        <arg value="catalog"/>
+        <arg value="--catalog"/>
+        <arg value="${CATALOG_NAME}"/>
+        <arg value="--server"/>
+        <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
+        <arg value="--org"/>
+        <arg value="indusapi-np"/>
+    </exec>
+</target>
+
+<!-- ================== BACKUP ================== -->
+<target name="backup" depends="publish">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
     <mkdir dir="apis/${API_NAME}/api_backup"/>
@@ -196,10 +197,7 @@
     <echo message=":package: Backup files pushed to GitHub"/>
 </target>
 
-
-   
-   <!-- ================== CI PIPELINE ================== -->
-  <target name="ci" depends="publish">
+<!-- ================== CI PIPELINE ================== -->
+<target name="ci" depends="backup">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
-  </target>
-</project>
+</target>
