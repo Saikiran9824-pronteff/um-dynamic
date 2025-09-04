@@ -1,10 +1,10 @@
 <project name="apic-cicd" default="ci" basedir=".">
-  <!-- ================== PROPERTIES ================== -->
-  <property name="default.API_NAME" value="loan-api"/>
-  <property name="default.API_VERSION" value="1.0.0"/>
-  <property name="default.PRODUCT_NAME" value="loan-product"/>
-  <property name="default.CATALOG_NAME" value="prod"/>
 
+  <!-- ================== PROPERTIES ================== -->
+  <property name="API_NAME" value="loan-api"/>
+  <property name="API_VERSION" value="1.0.0"/>
+  <property name="PRODUCT_NAME" value="loan-product"/>
+  <property name="CATALOG_NAME" value="prod"/>
   <property environment="env"/>
 
   <tstamp>
@@ -13,7 +13,7 @@
 
   <!-- ================== LOGIN ================== -->
   <target name="login">
-    <echo message=":closed_lock_with_key: Logging in to API Connect..."/>
+    <echo message="Logging in to API Connect..."/>
     <exec executable="apic" failonerror="true">
       <arg value="login"/>
       <arg value="--server"/>
@@ -29,7 +29,7 @@
 
   <!-- ================== VALIDATE API ================== -->
   <target name="validate" depends="login">
-    <echo message=":white_check_mark: Validating API YAML for ${API_NAME}_${API_VERSION}"/>
+    <echo message="Validating API YAML for ${API_NAME}_${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="validate"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
@@ -38,7 +38,7 @@
 
   <!-- ================== CHECK API ================== -->
   <target name="api-check" depends="validate">
-    <echo message=":mag_right: Checking if API exists..."/>
+    <echo message="Checking if API exists..."/>
     <exec executable="apic" failonerror="false" outputproperty="api.exists">
       <arg value="draft-apis:get"/>
       <arg value="${API_NAME}:${API_VERSION}"/>
@@ -63,7 +63,7 @@
   </target>
 
   <target name="api-create" unless="api.exists.true">
-    <echo message=":new: Creating new draft API ${API_NAME}:${API_VERSION}"/>
+    <echo message="Creating new draft API ${API_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-apis:create"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
@@ -75,7 +75,7 @@
   </target>
 
   <target name="api-update" if="api.exists.true">
-    <echo message=":recycle: Updating existing draft API ${API_NAME}:${API_VERSION}"/>
+    <echo message="Updating existing draft API ${API_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-apis:update"/>
       <arg line="${API_NAME}:${API_VERSION} apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"/>
@@ -88,7 +88,7 @@
 
   <!-- ================== FIX PRODUCT API REFS ================== -->
   <target name="fix-refs" depends="api-process">
-    <echo message=":wrench: Fixing API references in product YAML..."/>
+    <echo message="Fixing API references in product YAML..."/>
     <exec executable="bash" failonerror="true">
       <arg value="/var/lib/jenkins/scripts/fix-refs.sh"/>
       <arg value="products/${PRODUCT_NAME}"/>
@@ -98,7 +98,7 @@
 
   <!-- ================== CHECK PRODUCT ================== -->
   <target name="product-check" depends="fix-refs">
-    <echo message=":mag_right: Checking if Product exists..."/>
+    <echo message="Checking if Product exists..."/>
     <exec executable="apic" failonerror="false" outputproperty="product.exists">
       <arg value="draft-products:get"/>
       <arg value="${PRODUCT_NAME}:${API_VERSION}"/>
@@ -123,7 +123,7 @@
   </target>
 
   <target name="product-create" unless="product.exists.true">
-    <echo message=":new: Creating new draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
+    <echo message="Creating new draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-products:create"/>
       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
@@ -135,7 +135,7 @@
   </target>
 
   <target name="product-update" if="product.exists.true">
-    <echo message=":recycle: Updating existing draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
+    <echo message="Updating existing draft Product ${PRODUCT_NAME}:${API_VERSION}"/>
     <exec executable="apic" failonerror="true">
       <arg value="draft-products:update"/>
       <arg line="${PRODUCT_NAME}:${API_VERSION} products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
@@ -146,69 +146,64 @@
     </exec>
   </target>
 
-<!-- ================== PUBLISH PRODUCT ================== -->
-<target name="publish" depends="product-process">
-    <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
+  <!-- ================== PUBLISH PRODUCT ================== -->
+  <target name="publish" depends="product-process">
+    <echo message="Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
     <exec executable="apic" failonerror="true">
-        <arg value="products:publish"/>
-        <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
-        <arg value="--scope"/>
-        <arg value="catalog"/>
-        <arg value="--catalog"/>
-        <arg value="${CATALOG_NAME}"/>
-        <arg value="--server"/>
-        <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
-        <arg value="--org"/>
-        <arg value="indusapi-np"/>
+      <arg value="products:publish"/>
+      <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
+      <arg value="--scope"/>
+      <arg value="catalog"/>
+      <arg value="--catalog"/>
+      <arg value="${CATALOG_NAME}"/>
+      <arg value="--server"/>
+      <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
+      <arg value="--org"/>
+      <arg value="indusapi-np"/>
     </exec>
-</target>
+  </target>
 
-<!-- ================== BACKUP ================== -->
-<target name="backup" depends="publish">
-    <echo message=":floppy_disk: Backing up API and Product definitions..."/>
+  <!-- ================== BACKUP ================== -->
+  <target name="backup" depends="publish">
+    <echo message="Backing up API &amp; Product YAMLs with timestamp..."/>
+    <tstamp>
+      <format property="backup.timestamp" pattern="yyyyMMdd_HHmmss"/>
+    </tstamp>
 
-    <!-- Ensure backup directories exist -->
-    <mkdir dir="apis/${API_NAME}/api_backup"/>
-    <mkdir dir="products/${PRODUCT_NAME}/product_backup"/>
+    <mkdir dir="${basedir}/apis/${API_NAME}/API_BACKUP"/>
+    <copy file="${basedir}/apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
+          tofile="${basedir}/apis/${API_NAME}/API_BACKUP/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
+          overwrite="false"/>
 
-    <!-- Generate backup filenames with timestamp -->
-    <property name="api.backup.file" value="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-    <property name="product.backup.file" value="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+    <mkdir dir="${basedir}/products/${PRODUCT_NAME}/PRODUCT_BACKUP"/>
+    <copy file="${basedir}/products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
+          tofile="${basedir}/products/${PRODUCT_NAME}/PRODUCT_BACKUP/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
+          overwrite="false"/>
 
-    <!-- Copy API and Product to backup -->
-    <copy file="${API_FILE}" tofile="${api.backup.file}" overwrite="true"/>
-    <copy file="${PRODUCT_FILE}" tofile="${product.backup.file}" overwrite="true"/>
-
-    <!-- Stage new backup files -->
     <exec executable="git" failonerror="true">
-        <arg value="add"/>
-        <arg value="${api.backup.file}"/>
-        <arg value="${product.backup.file}"/>
+      <arg value="add"/>
+      <arg value="${basedir}/apis/${API_NAME}/API_BACKUP/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+      <arg value="${basedir}/products/${PRODUCT_NAME}/PRODUCT_BACKUP/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     </exec>
 
-    <!-- Commit backup with timestamp -->
     <exec executable="git" failonerror="true">
-        <arg value="commit"/>
-        <arg value="-m"/>
-        <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+      <arg value="commit"/>
+      <arg><![CDATA[-m "Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"]]></arg>
     </exec>
 
-    <!-- Push backup to GitHub using PAT -->
-    <echo message=":arrow_up: Pushing backup to GitHub branch main using PAT"/>
+    <echo message="Pushing backup to GitHub..."/>
     <exec executable="git" failonerror="true">
-        <arg value="push"/>
-        <arg value="https://${env.GITHUB_USERNAME}:${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-        <arg value="HEAD:main"/>
+      <arg value="push"/>
+      <arg value="origin"/>
+      <arg value="main"/>
     </exec>
 
-    <!-- Optional: cleanup workspace copies so Jenkins does not keep them -->
-    <delete file="${api.backup.file}" quiet="true"/>
-    <delete file="${product.backup.file}" quiet="true"/>
-</target>
+    <echo message="Backup completed and pushed at ${backup.timestamp}"/>
+  </target>
 
+  <!-- ================== CI PIPELINE ================== -->
+  <target name="ci" depends="backup">
+    <echo message="CI/CD pipeline completed successfully!"/>
+  </target>
 
-
-<!-- ================== CI PIPELINE ================== -->
-<target name="ci" depends="backup">
-    <echo message=":tada: CI/CD pipeline completed successfully!"/>
-</target>
+</project>
