@@ -164,7 +164,7 @@
   </target>
 
   <!-- ================== BACKUP ================== -->
-  <target name="backup" depends="publish">
+<target name="backup" depends="publish">
     <echo message="Backing up API &amp; Product YAMLs with timestamp..."/>
     <tstamp>
       <format property="backup.timestamp" pattern="yyyyMMdd_HHmmss"/>
@@ -181,25 +181,21 @@
           overwrite="false"/>
 
     <exec executable="git" failonerror="true">
-      <arg value="add"/>
-      <arg value="${basedir}/apis/${API_NAME}/API_BACKUP/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-      <arg value="${basedir}/products/${PRODUCT_NAME}/PRODUCT_BACKUP/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+        <arg line="add ${basedir}/apis/${API_NAME}/API_BACKUP/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml ${basedir}/products/${PRODUCT_NAME}/PRODUCT_BACKUP/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     </exec>
 
     <exec executable="git" failonerror="true">
-      <arg value="commit"/>
-      <arg><![CDATA[-m "Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"]]></arg>
+        <arg line="commit -m &quot;Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}&quot;"/>
     </exec>
 
     <echo message="Pushing backup to GitHub..."/>
     <exec executable="git" failonerror="true">
-      <arg value="push"/>
-      <arg value="origin"/>
-      <arg value="main"/>
+        <arg line="push origin main"/>
     </exec>
 
     <echo message="Backup completed and pushed at ${backup.timestamp}"/>
-  </target>
+</target>
+
 
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="backup">
