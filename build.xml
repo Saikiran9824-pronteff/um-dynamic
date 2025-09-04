@@ -4,7 +4,6 @@
   <property name="default.API_VERSION" value="1.0.0"/>
   <property name="default.PRODUCT_NAME" value="loan-product"/>
   <property name="default.CATALOG_NAME" value="prod"/>
-
   <property environment="env"/>
 
   <tstamp>
@@ -146,25 +145,25 @@
     </exec>
   </target>
 
-<!-- ================== PUBLISH PRODUCT ================== -->
-<target name="publish" depends="product-process">
+  <!-- ================== PUBLISH PRODUCT ================== -->
+  <target name="publish" depends="product-process">
     <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
     <exec executable="apic" failonerror="true">
-        <arg value="products:publish"/>
-        <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
-        <arg value="--scope"/>
-        <arg value="catalog"/>
-        <arg value="--catalog"/>
-        <arg value="${CATALOG_NAME}"/>
-        <arg value="--server"/>
-        <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
-        <arg value="--org"/>
-        <arg value="indusapi-np"/>
+      <arg value="products:publish"/>
+      <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
+      <arg value="--scope"/>
+      <arg value="catalog"/>
+      <arg value="--catalog"/>
+      <arg value="${CATALOG_NAME}"/>
+      <arg value="--server"/>
+      <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
+      <arg value="--org"/>
+      <arg value="indusapi-np"/>
     </exec>
-</target>
+  </target>
 
-<!-- ================== BACKUP ================== -->
-<target name="backup" depends="publish">
+  <!-- ================== BACKUP ================== -->
+  <target name="backup" depends="publish">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
     <mkdir dir="apis/${API_NAME}/api_backup"/>
@@ -178,32 +177,25 @@
           overwrite="true"/>
 
     <exec executable="git">
-        <arg value="add"/>
-        <arg value="."/>
+      <arg value="add"/>
+      <arg value="."/>
     </exec>
 
     <exec executable="git">
-        <arg value="commit"/>
-        <arg value="-m"/>
-        <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
+      <arg value="commit"/>
+      <arg value="-m"/>
+      <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
     <exec executable="git">
-        <arg value="push"/>
-        <arg value="origin"/>
-        <arg value="HEAD:main"/>
+      <arg value="push"/>
+      <arg value="origin"/>
+      <arg value="HEAD:main"/>
     </exec>
-    <exec executable="git">
-        <arg value="push"/>
-        <arg value="https://<USERNAME>:<PAT>@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-    </exec>
+  </target>
 
-
-    <echo message=":package: Backup files pushed to GitHub"/>
-</target>
-
-<!-- ================== CI PIPELINE ================== -->
-<target name="ci" depends="backup">
+  <!-- ================== CI PIPELINE ================== -->
+  <target name="ci" depends="backup">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
-</target>
-  </project>
+  </target>
+</project>
