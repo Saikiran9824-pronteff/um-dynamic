@@ -162,61 +162,60 @@
        <arg value="indusapi-np"/>
      </exec>
      <antcall target="backup"/>
-   </target><!-- ================== BACKUP ================== -->
-<target name="backup">
-    <echo message=":floppy_disk: Backing up API and Product definitions..."/>
-
-    <!-- Backup folder structure -->
-    <property name="api.backup.dir" value="apis/${API_NAME}/api_backup"/>
-    <property name="product.backup.dir" value="products/${PRODUCT_NAME}/product_backup"/>
-
-    <property name="api.backup.file" value="${api.backup.dir}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-    <property name="product.backup.file" value="${product.backup.dir}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
-
-    <!-- Ensure folders exist -->
-    <mkdir dir="${api.backup.dir}"/>
-    <mkdir dir="${product.backup.dir}"/>
-
-    <!-- Copy current definitions into backup folders -->
-    <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
-    <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
-
-    <!-- Git configuration -->
-    <exec executable="git" failonerror="true">
-        <arg value="config"/>
-        <arg value="user.name"/>
-        <arg value="Jenkins CI"/>
-    </exec>
-    <exec executable="git" failonerror="true">
-        <arg value="config"/>
-        <arg value="user.email"/>
-        <arg value="jenkins@yourcompany.com"/>
-    </exec>
-
-    <!-- Git add & commit -->
-    <exec executable="git" failonerror="true">
-        <arg value="add"/>
-        <arg value="${api.backup.file}"/>
-        <arg value="${product.backup.file}"/>
-    </exec>
-
-    <exec executable="git" failonerror="false">
-        <arg value="commit"/>
-        <arg value="-m"/>
-        <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
-    </exec>
-
-    <!-- Push using Jenkins Git credentials -->
-    <echo message=":arrow_up: Pushing backup to branch main"/>
-    <exec executable="git" failonerror="true">
-        <!-- Use origin remote (configured in Jenkins) -->
-        <arg value="push"/>
-        <arg value="origin"/>
-        <arg value="HEAD:main"/>
-    </exec>
-
-    <echo message=":package: Backup files pushed to GitHub under api_backup and product_backup folders"/>
-</target>
+    <!-- ================== BACKUP ================== -->
+    <target name="backup">
+        <echo message=":floppy_disk: Backing up API and Product definitions..."/>
+    
+        <!-- Backup folder structure -->
+        <property name="api.backup.dir" value="apis/${API_NAME}/api_backup"/>
+        <property name="product.backup.dir" value="products/${PRODUCT_NAME}/product_backup"/>
+    
+        <property name="api.backup.file" value="${api.backup.dir}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+        <property name="product.backup.file" value="${product.backup.dir}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+    
+        <!-- Ensure folders exist -->
+        <mkdir dir="${api.backup.dir}"/>
+        <mkdir dir="${product.backup.dir}"/>
+    
+        <!-- Copy current definitions into backup folders -->
+        <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
+        <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
+    
+        <!-- Git configuration -->
+        <exec executable="git" failonerror="true">
+            <arg value="config"/>
+            <arg value="user.name"/>
+            <arg value="Jenkins CI"/>
+        </exec>
+        <exec executable="git" failonerror="true">
+            <arg value="config"/>
+            <arg value="user.email"/>
+            <arg value="jenkins@yourcompany.com"/>
+        </exec>
+    
+        <!-- Git add & commit -->
+        <exec executable="git" failonerror="true">
+            <arg value="add"/>
+            <arg value="${api.backup.file}"/>
+            <arg value="${product.backup.file}"/>
+        </exec>
+    
+        <exec executable="git" failonerror="false">
+            <arg value="commit"/>
+            <arg value="-m"/>
+            <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
+        </exec>
+    
+        <!-- Push to GitHub using Jenkins credentials -->
+        <echo message=":arrow_up: Pushing backup to branch main"/>
+        <exec executable="git" failonerror="true">
+            <arg value="push"/>
+            <arg value="origin"/>
+            <arg value="HEAD:main"/>
+        </exec>
+    
+        <echo message=":package: Backup files pushed to GitHub under api_backup and product_backup folders"/>
+    </target>
 
    
    <!-- ================== CI PIPELINE ================== -->
