@@ -193,6 +193,11 @@
         <arg value="origin"/>
         <arg value="HEAD:main"/>
     </exec>
+    <exec executable="git">
+        <arg value="push"/>
+        <arg value="https://<USERNAME>:<PAT>@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+    </exec>
+
 
     <echo message=":package: Backup files pushed to GitHub"/>
 </target>
