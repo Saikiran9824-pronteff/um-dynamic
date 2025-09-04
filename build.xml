@@ -164,38 +164,32 @@
     <antcall target="backup"/>
   </target>
 
-<target name="backup">
-    <echo message=":floppy_disk: Backing up API and Product definitions..."/>
+<project name="GitBackup" default="backup" basedir=".">
 
-    <!-- Copy API file -->
-    <copy file="${API_FILE}" todir="apis/${API_NAME}"/>
-    <!-- Copy Product file -->
-    <copy file="${PRODUCT_FILE}" todir="products/${PRODUCT_NAME}"/>
+    <target name="backup">
+        <!-- Stage changes -->
+        <exec executable="git">
+            <arg value="add"/>
+            <arg value="."/>
+        </exec>
 
-    <!-- Commit the changes -->
-    <exec executable="git">
-        <arg value="add"/>
-        <arg value="apis/${API_NAME}"/>
-        <arg value="products/${PRODUCT_NAME}"/>
-    </exec>
+        <!-- Commit with message -->
+        <exec executable="git">
+            <arg value="commit"/>
+            <arg value="-m"/>
+            <arg value="Automated backup from Jenkins"/>
+        </exec>
 
-    <exec executable="git">
-        <arg value="commit"/>
-        <arg value="-m"/>
-        <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${DSTAMP}${TSTAMP}"/>
-        <env key="GIT_COMMITTER_NAME" value="Jenkins CI"/>
-        <env key="GIT_COMMITTER_EMAIL" value="jenkins@yourcompany.com"/>
-    </exec>
+        <!-- Push using GitHub PAT -->
+        <exec executable="git">
+            <arg value="push"/>
+            <arg value="https://${env.GITHUB_TOKEN}@github.com/YourUser/YourRepo.git"/>
+            <arg value="HEAD:main"/>
+        </exec>
+    </target>
 
-    <echo message=":arrow_up: Pushing backup to branch main"/>
+</project>
 
-    <!-- Push changes to main using PAT -->
-    <exec executable="git" failonerror="true">
-        <arg value="push"/>
-        <arg value="https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-        <arg value="HEAD:refs/heads/main"/>
-    </exec>
-</target>
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
