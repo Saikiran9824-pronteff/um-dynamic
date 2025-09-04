@@ -5,33 +5,7 @@
   <property name="default.PRODUCT_NAME" value="loan-product"/>
   <property name="default.CATALOG_NAME" value="prod"/>
 
-  <condition property="API_NAME" value="${default.API_NAME}">
-    <or>
-      <not><isset property="API_NAME"/></not>
-      <equals arg1="${API_NAME}" arg2=""/>
-    </or>
-  </condition>
-
-  <condition property="API_VERSION" value="${default.API_VERSION}">
-    <or>
-      <not><isset property="API_VERSION"/></not>
-      <equals arg1="${API_VERSION}" arg2=""/>
-    </or>
-  </condition>
-
-  <condition property="PRODUCT_NAME" value="${default.PRODUCT_NAME}">
-    <or>
-      <not><isset property="PRODUCT_NAME"/></not>
-      <equals arg1="${PRODUCT_NAME}" arg2=""/>
-    </or>
-  </condition>
-
-  <condition property="CATALOG_NAME" value="${default.CATALOG_NAME}">
-    <or>
-      <not><isset property="CATALOG_NAME"/></not>
-      <equals arg1="${CATALOG_NAME}" arg2=""/>
-    </or>
-  </condition>
+  <property environment="env"/>
 
   <tstamp>
     <format property="backup.timestamp" pattern="yyyyMMddHHmmss"/>
@@ -223,14 +197,12 @@
       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
-    <!-- Ensure remote URL uses PAT (via Jenkins credentials env vars) -->
+    <!-- Update remote URL with Jenkins-injected PAT -->
     <exec executable="git" dir="." failonerror="true">
-      <env key="GITHUB_USER" value="${env.GITHUB_USER}"/>
-      <env key="GITHUB_TOKEN" value="${env.GITHUB_TOKEN}"/>
       <arg value="remote"/>
       <arg value="set-url"/>
       <arg value="origin"/>
-      <arg value="https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+      <arg value="https://${env.GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
     </exec>
 
     <!-- Detect current branch -->
