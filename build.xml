@@ -5,11 +5,6 @@
   <property name="default.PRODUCT_NAME" value="loan-product"/>
   <property name="default.CATALOG_NAME" value="prod"/>
 
-  <!-- GitHub repo details -->
-  <property name="git.repo" value="https://github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-  <property name="git.user" value="Saikiran9824-pronteff"/>
-  <property name="git.token" value="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"/>
-
   <condition property="API_NAME" value="${default.API_NAME}">
     <or>
       <not><isset property="API_NAME"/></not>
@@ -199,42 +194,43 @@
   <target name="backup">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
-    <!-- Configure git identity -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="config"/>
       <arg value="user.name"/>
       <arg value="Jenkins CI"/>
     </exec>
+
     <exec executable="git" dir="." failonerror="true">
       <arg value="config"/>
       <arg value="user.email"/>
       <arg value="jenkins@yourcompany.com"/>
     </exec>
 
-    <!-- Ensure remote URL has credentials -->
-    <exec executable="git" dir="." failonerror="true">
-      <arg value="remote"/>
-      <arg value="set-url"/>
-      <arg value="origin"/>
-      <arg value="https://${git.user}:${git.token}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-    </exec>
-
-    <!-- Copy backup files -->
     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
           tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
           tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
 
-    <!-- Commit changes -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="add"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
       <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     </exec>
+
     <exec executable="git" dir="." failonerror="true">
       <arg value="commit"/>
       <arg value="-m"/>
       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+    </exec>
+
+    <!-- Ensure remote URL uses PAT (via Jenkins credentials env vars) -->
+    <exec executable="git" dir="." failonerror="true">
+      <env key="GITHUB_USER" value="${env.GITHUB_USER}"/>
+      <env key="GITHUB_TOKEN" value="${env.GITHUB_TOKEN}"/>
+      <arg value="remote"/>
+      <arg value="set-url"/>
+      <arg value="origin"/>
+      <arg value="https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
     </exec>
 
     <!-- Detect current branch -->
@@ -244,7 +240,6 @@
       <arg value="HEAD"/>
     </exec>
 
-    <!-- Push backup -->
     <echo message=":arrow_up: Pushing backup to branch ${git.branch}"/>
     <exec executable="git" dir="." failonerror="true">
       <arg value="push"/>
