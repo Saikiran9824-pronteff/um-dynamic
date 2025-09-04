@@ -164,52 +164,48 @@
     <antcall target="backup"/>
   </target>
    
-   <target name="backup">
-       <echo message=":floppy_disk: Backing up API and Product definitions..."/>
-   
-       <!-- Create timestamp variable -->
-       <tstamp>
-           <format property="BACKUP_TIMESTAMP" pattern="yyyyMMdd_HHmmss"/>
-       </tstamp>
-   
-       <!-- Define backup directories with timestamp -->
-       <property name="API_BACKUP_DIR" value="api_backup/${API_NAME}_${BACKUP_TIMESTAMP}"/>
-       <property name="PRODUCT_BACKUP_DIR" value="product_backup/${PRODUCT_NAME}_${BACKUP_TIMESTAMP}"/>
-   
-       <!-- Create backup directories -->
-       <mkdir dir="${API_BACKUP_DIR}"/>
-       <mkdir dir="${PRODUCT_BACKUP_DIR}"/>
-   
-       <!-- Copy API and Product files into backup directories -->
-       <copy file="${API_FILE}" todir="${API_BACKUP_DIR}" overwrite="true"/>
-       <copy file="${PRODUCT_FILE}" todir="${PRODUCT_BACKUP_DIR}" overwrite="true"/>
-   
-       <!-- Stage new/updated files in GitHub repo -->
-       <exec executable="git" failonerror="true">
-           <arg value="add"/>
-           <arg value="${API_BACKUP_DIR}/${API_FILE}"/>
-           <arg value="${PRODUCT_BACKUP_DIR}/${PRODUCT_FILE}"/>
-       </exec>
-   
-       <!-- Commit with timestamp -->
-       <exec executable="git" failonerror="true">
-           <arg value="commit"/>
-           <arg value="-m"/>
-           <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${BACKUP_TIMESTAMP}"/>
-       </exec>
-   
-       <!-- Push backup to GitHub -->
-       <echo message=":arrow_up: Pushing backup to branch main"/>
-       <exec executable="git" failonerror="true">
-           <arg value="push"/>
-           <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-           <arg value="HEAD:main"/>
-       </exec>
-   </target>
-   
-
+    <target name="backup">
+        <echo message=":floppy_disk: Backing up API and Product definitions..."/>        
+    <!-- Create timestamp variable -->
+        <tstamp>
+            <format property="BACKUP_TIMESTAMP" pattern="yyyyMMdd_HHmmss"/>
+        </tstamp>        
+    <!-- Define API and Product base directories -->
+        <property name="API_BASE_DIR" value="apis/${API_NAME}"/>
+        <property name="PRODUCT_BASE_DIR" value="products/${PRODUCT_NAME}"/>        
+    <!-- Define backup directories under each API/Product folder -->
+        <property name="API_BACKUP_DIR" value="${API_BASE_DIR}/api_backup/${BACKUP_TIMESTAMP}"/>
+        <property name="PRODUCT_BACKUP_DIR" value="${PRODUCT_BASE_DIR}/product_backup/${BACKUP_TIMESTAMP}"/>        
+    <!-- Create backup directories -->
+        <mkdir dir="${API_BACKUP_DIR}"/>
+        <mkdir dir="${PRODUCT_BACKUP_DIR}"/>        
+    <!-- Copy API and Product files into backup directories -->
+        <copy file="${API_FILE}" todir="${API_BACKUP_DIR}" overwrite="true"/>
+        <copy file="${PRODUCT_FILE}" todir="${PRODUCT_BACKUP_DIR}" overwrite="true"/>        
+    <!-- Stage new/updated files in GitHub repo -->
+        <exec executable="git" failonerror="true">
+            <arg value="add"/>
+            <arg value="${API_BACKUP_DIR}/${API_FILE}"/>
+            <arg value="${PRODUCT_BACKUP_DIR}/${PRODUCT_FILE}"/>
+        </exec>        
+    <!-- Commit with timestamp -->
+        <exec executable="git" failonerror="true">
+            <arg value="commit"/>
+            <arg value="-m"/>
+            <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${BACKUP_TIMESTAMP}"/>
+        </exec>        
+    <!-- Push backup to GitHub -->
+        <echo message=":arrow_up: Pushing backup to branch main"/>
+        <exec executable="git" failonerror="true">
+            <arg value="push"/>
+            <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+            <arg value="HEAD:main"/>
+        </exec>
+    </target>        
+           
   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
   </target>
 </project>
+
