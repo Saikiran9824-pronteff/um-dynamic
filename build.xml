@@ -164,44 +164,52 @@
     <antcall target="backup"/>
   </target>
 
-    <target name="backup">
-        <echo message=":floppy_disk: Backing up API and Product definitions..."/>
-
-        <!-- Copy API file into correct folder in repo -->
-        <copy file="${API_FILE}" todir="apis/${API_NAME}" overwrite="true"/>
-
-        <!-- Copy Product file into correct folder in repo -->
-        <copy file="${PRODUCT_FILE}" todir="products/${PRODUCT_NAME}" overwrite="true"/>
-
-        <!-- Stage new/updated files -->
-        <exec executable="git" failonerror="true">
-            <arg value="add"/>
-            <arg value="apis/${API_NAME}/${API_FILE}"/>
-            <arg value="products/${PRODUCT_NAME}/${PRODUCT_FILE}"/>
-        </exec>
-
-        <!-- Commit with timestamp -->
-        <exec executable="git" failonerror="true">
-            <arg value="commit"/>
-            <arg value="-m"/>
-            <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${DSTAMP}${TSTAMP}"/>
-        </exec>
-
-        <!-- Push using GitHub PAT -->
-        <echo message=":arrow_up: Pushing backup to branch main"/>
-        <exec executable="git" failonerror="true">
-            <arg value="push"/>
-            <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-            <arg value="HEAD:main"/>
-        </exec>
-
-        <!-- Cleanup copied files from Jenkins workspace so only GitHub keeps backups -->
-        <delete file="apis/${API_NAME}/${API_FILE}" quiet="true"/>
-        <delete file="products/${PRODUCT_NAME}/${PRODUCT_FILE}" quiet="true"/>
-    </target>
-
-
-  <!-- ================== CI PIPELINE ================== -->
+   <!-- ================== BACKUP ================== -->
+   <target name="backup">
+     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
+   
+     <!-- Generate backup filenames with timestamp -->
+     <property name="api.backup.file" value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+     <property name="product.backup.file" value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+   
+     <!-- Ensure folders exist -->
+     <mkdir dir="apis/${API_NAME}"/>
+     <mkdir dir="products/${PRODUCT_NAME}"/>
+   
+     <!-- Copy API to backup file -->
+     <copy file="${API_FILE}" tofile="${api.backup.file}" overwrite="true"/>
+     <!-- Copy Product to backup file -->
+     <copy file="${PRODUCT_FILE}" tofile="${product.backup.file}" overwrite="true"/>
+   
+     <!-- Stage new backup files -->
+     <exec executable="git" failonerror="true">
+       <arg value="add"/>
+       <arg value="${api.backup.file}"/>
+       <arg value="${product.backup.file}"/>
+     </exec>
+   
+     <!-- Commit with timestamp -->
+     <exec executable="git" failonerror="true">
+       <arg value="commit"/>
+       <arg value="-m"/>
+       <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+     </exec>
+   
+     <!-- Push using GitHub PAT -->
+     <echo message=":arrow_up: Pushing backup to branch main"/>
+     <exec executable="git" failonerror="true">
+       <arg value="push"/>
+       <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+       <arg value="HEAD:main"/>
+     </exec>
+   
+     <!-- Cleanup workspace copy so Jenkins does not keep backups -->
+     <delete file="${api.backup.file}" quiet="true"/>
+     <delete file="${product.backup.file}" quiet="true"/>
+   </target>
+   
+   
+   <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
   </target>
