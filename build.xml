@@ -89,10 +89,10 @@
   <!-- ================== FIX PRODUCT API REFS ================== -->
   <target name="fix-refs" depends="api-process">
     <echo message=":wrench: Fixing API references in product YAML..."/>
+    <!-- Instead of scanning all backups, force product to reference stable base API YAML -->
     <exec executable="bash" failonerror="true">
-      <arg value="/var/lib/jenkins/scripts/fix-refs.sh"/>
-      <arg value="products/${PRODUCT_NAME}"/>
-      <arg value="apis"/>
+      <arg value="-c"/>
+      <arg value="yq eval '(.apis[] | select(.name == \"${API_NAME}\").ref) = \"../../apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml\"' products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml -i"/>
     </exec>
   </target>
 
@@ -177,9 +177,9 @@
      <mkdir dir="products/${PRODUCT_NAME}"/>
    
      <!-- Copy API to backup file -->
-     <copy file="${API_FILE}" tofile="${api.backup.file}" overwrite="true"/>
+     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml" tofile="${api.backup.file}" overwrite="true"/>
      <!-- Copy Product to backup file -->
-     <copy file="${PRODUCT_FILE}" tofile="${product.backup.file}" overwrite="true"/>
+     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml" tofile="${product.backup.file}" overwrite="true"/>
    
      <!-- Stage new backup files -->
      <exec executable="git" failonerror="true">
@@ -202,12 +202,11 @@
        <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
        <arg value="HEAD:main"/>
      </exec>
-   
+
      <!-- Cleanup workspace copy so Jenkins does not keep backups -->
      <delete file="${api.backup.file}" quiet="true"/>
      <delete file="${product.backup.file}" quiet="true"/>
    </target>
-   
    
    <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
