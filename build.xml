@@ -1,9 +1,40 @@
 <project name="apic-cicd" default="ci" basedir=".">
   <!-- ================== PROPERTIES ================== -->
-  <property name="API_NAME" value="loan-api"/>
-  <property name="API_VERSION" value="1.0.0"/>
-  <property name="PRODUCT_NAME" value="loan-product"/>
-  <property name="CATALOG_NAME" value="prod"/>
+  <!-- Default values -->
+  <property name="default.API_NAME" value="loan-api"/>
+  <property name="default.API_VERSION" value="1.0.0"/>
+  <property name="default.PRODUCT_NAME" value="loan-product"/>
+  <property name="default.CATALOG_NAME" value="prod"/>
+
+  <!-- Resolve final values (fallback to defaults if empty or unset) -->
+  <condition property="API_NAME" value="${default.API_NAME}">
+    <or>
+      <not><isset property="API_NAME"/></not>
+      <equals arg1="${API_NAME}" arg2=""/>
+    </or>
+  </condition>
+
+  <condition property="API_VERSION" value="${default.API_VERSION}">
+    <or>
+      <not><isset property="API_VERSION"/></not>
+      <equals arg1="${API_VERSION}" arg2=""/>
+    </or>
+  </condition>
+
+  <condition property="PRODUCT_NAME" value="${default.PRODUCT_NAME}">
+    <or>
+      <not><isset property="PRODUCT_NAME"/></not>
+      <equals arg1="${PRODUCT_NAME}" arg2=""/>
+    </or>
+  </condition>
+
+  <condition property="CATALOG_NAME" value="${default.CATALOG_NAME}">
+    <or>
+      <not><isset property="CATALOG_NAME"/></not>
+      <equals arg1="${CATALOG_NAME}" arg2=""/>
+    </or>
+  </condition>
+
   <!-- generate timestamp -->
   <tstamp>
     <format property="backup.timestamp" pattern="yyyyMMddHHmmss"/>
@@ -159,7 +190,6 @@
       <arg value="--org"/>
       <arg value="indusapi-np"/>
     </exec>
-    <!-- Run backup only after publish succeeds -->
     <antcall target="backup"/>
   </target>
 
@@ -167,7 +197,6 @@
   <target name="backup">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
-    <!-- Configure git -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="config"/>
       <arg value="user.name"/>
@@ -180,13 +209,11 @@
       <arg value="jenkins@yourcompany.com"/>
     </exec>
 
-    <!-- Copy files with timestamp -->
     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
           tofile="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
     <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
           tofile="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
 
-    <!-- Git commit and push -->
     <exec executable="git" dir="." failonerror="true">
       <arg value="add"/>
       <arg value="apis/${API_NAME}/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
