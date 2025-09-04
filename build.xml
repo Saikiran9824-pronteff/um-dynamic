@@ -201,3 +201,4 @@
 <target name="ci" depends="backup">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
 </target>
+  </project>
