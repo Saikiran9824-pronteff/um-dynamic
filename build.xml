@@ -4,6 +4,7 @@
   <property name="default.API_VERSION" value="1.0.0"/>
   <property name="default.PRODUCT_NAME" value="loan-product"/>
   <property name="default.CATALOG_NAME" value="prod"/>
+
   <property environment="env"/>
 
   <tstamp>
@@ -145,30 +146,32 @@
     </exec>
   </target>
 
-  <!-- ================== PUBLISH PRODUCT ================== -->
-  <target name="publish" depends="product-process">
+<!-- ================== PUBLISH PRODUCT ================== -->
+<target name="publish" depends="product-process">
     <echo message=":rocket: Publishing Product ${PRODUCT_NAME}_${API_VERSION}.yaml to catalog ${CATALOG_NAME}"/>
     <exec executable="apic" failonerror="true">
-      <arg value="products:publish"/>
-      <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
-      <arg value="--scope"/>
-      <arg value="catalog"/>
-      <arg value="--catalog"/>
-      <arg value="${CATALOG_NAME}"/>
-      <arg value="--server"/>
-      <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
-      <arg value="--org"/>
-      <arg value="indusapi-np"/>
+        <arg value="products:publish"/>
+        <arg value="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"/>
+        <arg value="--scope"/>
+        <arg value="catalog"/>
+        <arg value="--catalog"/>
+        <arg value="${CATALOG_NAME}"/>
+        <arg value="--server"/>
+        <arg value="https://small-1-mgmt-api-manager-cp4i.apps.ocp.prontefflabs.com"/>
+        <arg value="--org"/>
+        <arg value="indusapi-np"/>
     </exec>
-  </target>
+</target>
 
-  <!-- ================== BACKUP ================== -->
-  <target name="backup" depends="publish">
+<!-- ================== BACKUP ================== -->
+<target name="backup" depends="publish">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
+    <!-- Ensure backup directories exist -->
     <mkdir dir="apis/${API_NAME}/api_backup"/>
     <mkdir dir="products/${PRODUCT_NAME}/product_backup"/>
 
+    <!-- Copy files to backup with timestamp -->
     <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
           tofile="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
           overwrite="true"/>
@@ -176,32 +179,34 @@
           tofile="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
           overwrite="true"/>
 
-    <exec executable="git">
-      <arg value="add"/>
-      <arg value="."/>
+    <!-- Stage new backup files -->
+    <exec executable="git" failonerror="true">
+        <arg value="add"/>
+        <arg value="."/>
     </exec>
 
-    <exec executable="git">
-      <arg value="commit"/>
-      <arg value="-m"/>
-      <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
+    <!-- Commit changes -->
+    <exec executable="git" failonerror="true">
+        <arg value="commit"/>
+        <arg value="-m"/>
+        <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
-    <exec executable="git">
-      <arg value="push"/>
-      <arg value="origin"/>
-      <arg value="HEAD:main"/>
+    <!-- Push using GitHub PAT stored in Jenkins environment variable -->
+    <echo message=":arrow_up: Pushing backup to branch main using PAT"/>
+    <exec executable="git" failonerror="true">
+        <arg value="push"/>
+        <arg value="https://${env.GITHUB_USERNAME}:${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
+        <arg value="HEAD:main"/>
     </exec>
-  </target>
 
-  <exec executable="git">
-      <arg value="push"/>
-      <arg value="https://${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
-  </exec>
+    <!-- Optional: cleanup workspace copies -->
+    <delete file="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml" quiet="true"/>
+    <delete file="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml" quiet="true"/>
+</target>
 
 
-  <!-- ================== CI PIPELINE ================== -->
-  <target name="ci" depends="backup">
+<!-- ================== CI PIPELINE ================== -->
+<target name="ci" depends="backup">
     <echo message=":tada: CI/CD pipeline completed successfully!"/>
-  </target>
-</project>
+</target>
