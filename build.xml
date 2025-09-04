@@ -163,8 +163,8 @@
      </exec>
      <antcall target="backup"/>
    </target>
-     <!-- ================== BACKUP ================== -->
-    <target name="backup">
+  <!-- ================== BACKUP ================== -->
+  <target name="backup">
     <echo message=":floppy_disk: Backing up API and Product definitions..."/>
 
     <!-- New folder structure -->
@@ -192,19 +192,18 @@
     <exec executable="git" failonerror="true">
       <arg value="commit"/>
       <arg value="-m"/>
-      <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
+      <arg value="backup: ${API_NAME} v${API_VERSION} and ${PRODUCT_NAME} v${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
+    <!-- Push to GitHub using Jenkins credentials -->
     <echo message=":arrow_up: Pushing backup to branch main"/>
     <exec executable="bash" failonerror="true">
       <arg value="-c"/>
       <arg value="git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git HEAD:main"/>
     </exec>
 
-    <!-- Keep backups, no delete -->
-    <echo message=":package: Backup files retained under api_backup and product_backup"/>
+    <echo message=":package: Backup files pushed to GitHub under api_backup and product_backup folders"/>
   </target>
-
    
    <!-- ================== CI PIPELINE ================== -->
   <target name="ci" depends="publish">
