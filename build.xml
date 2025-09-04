@@ -171,39 +171,41 @@
     <mkdir dir="apis/${API_NAME}/api_backup"/>
     <mkdir dir="products/${PRODUCT_NAME}/product_backup"/>
 
-    <!-- Copy files to backup with timestamp -->
-    <copy file="apis/${API_NAME}/${API_NAME}_${API_VERSION}.yaml"
-          tofile="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
-          overwrite="true"/>
-    <copy file="products/${PRODUCT_NAME}/${PRODUCT_NAME}_${API_VERSION}.yaml"
-          tofile="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"
-          overwrite="true"/>
+    <!-- Generate backup filenames with timestamp -->
+    <property name="api.backup.file" value="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+    <property name="product.backup.file" value="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml"/>
+
+    <!-- Copy API and Product to backup -->
+    <copy file="${API_FILE}" tofile="${api.backup.file}" overwrite="true"/>
+    <copy file="${PRODUCT_FILE}" tofile="${product.backup.file}" overwrite="true"/>
 
     <!-- Stage new backup files -->
     <exec executable="git" failonerror="true">
         <arg value="add"/>
-        <arg value="."/>
+        <arg value="${api.backup.file}"/>
+        <arg value="${product.backup.file}"/>
     </exec>
 
-    <!-- Commit changes -->
+    <!-- Commit backup with timestamp -->
     <exec executable="git" failonerror="true">
         <arg value="commit"/>
         <arg value="-m"/>
         <arg value="Backup API ${API_NAME}:${API_VERSION} and Product ${PRODUCT_NAME}:${API_VERSION} at ${backup.timestamp}"/>
     </exec>
 
-    <!-- Push using GitHub PAT stored in Jenkins environment variable -->
-    <echo message=":arrow_up: Pushing backup to branch main using PAT"/>
+    <!-- Push backup to GitHub using PAT -->
+    <echo message=":arrow_up: Pushing backup to GitHub branch main using PAT"/>
     <exec executable="git" failonerror="true">
         <arg value="push"/>
         <arg value="https://${env.GITHUB_USERNAME}:${env.GITHUB_TOKEN}@github.com/Saikiran9824-pronteff/um-dynamic.git"/>
         <arg value="HEAD:main"/>
     </exec>
 
-    <!-- Optional: cleanup workspace copies -->
-    <delete file="apis/${API_NAME}/api_backup/${API_NAME}_${API_VERSION}_${backup.timestamp}.yaml" quiet="true"/>
-    <delete file="products/${PRODUCT_NAME}/product_backup/${PRODUCT_NAME}_${API_VERSION}_${backup.timestamp}.yaml" quiet="true"/>
+    <!-- Optional: cleanup workspace copies so Jenkins does not keep them -->
+    <delete file="${api.backup.file}" quiet="true"/>
+    <delete file="${product.backup.file}" quiet="true"/>
 </target>
+
 
 
 <!-- ================== CI PIPELINE ================== -->
