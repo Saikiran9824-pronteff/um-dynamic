@@ -3,7 +3,7 @@ info:
   title: loan-product
   name: loan-product
 gateways:
-  - datapower-api-gateway
+- datapower-api-gateway
 plans:
   default-plan:
     title: Default Plan
@@ -15,7 +15,7 @@ plans:
       loan-api: {}
 apis:
   loan-api:
-    $ref: ../../apis/loan-api/loan-api_1.0.0.yaml
+    $ref: loan-api_1.0.0_3.yaml
 visibility:
   view:
     type: public
